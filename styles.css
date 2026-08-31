@@ -644,41 +644,6 @@ nav .links a:hover .nav-char {
 	}
 }
 
-.dolls-swirl {
-	width: 46px;
-	height: 22px;
-	margin-left: 8px;
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 2.4;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-	vertical-align: middle;
-	animation: dollsSwirl 2s ease-in-out infinite;
-}
-
-@keyframes dollsSwirl {
-	0%,
-	100% {
-		transform: translateX(0) rotate(0deg);
-		opacity: 0.7;
-	}
-	50% {
-		transform: translateX(6px) rotate(-6deg);
-		opacity: 1;
-	}
-}
-
-.dolls-hint {
-	font-family: var(--font-body);
-	font-size: 12px;
-	letter-spacing: 0.12em;
-	text-transform: uppercase;
-	color: var(--grey);
-	vertical-align: middle;
-	margin-left: 2px;
-}
-
 .start-stage {
 	position: relative;
 	min-height: 340px;
@@ -719,7 +684,6 @@ nav .links a:hover .nav-char {
 .start-stage.photo-open .start-pop {
 	opacity: 1;
 	visibility: visible;
-	pointer-events: auto;
 	transform: translateY(0) scale(1);
 }
 
@@ -1500,8 +1464,7 @@ footer {
 	.city-lines .block {
 		opacity: 1;
 	}
-	.dolls-trigger,
-	.dolls-swirl {
+	.dolls-trigger {
 		animation: none;
 	}
 	.start-pop,
