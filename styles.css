@@ -613,6 +613,66 @@ nav .links a:hover .nav-char {
 	margin-bottom: 16px;
 }
 
+/* ---------- start photo (окно в прошлое) ---------- */
+.start-cols {
+	grid-template-columns: 1fr 1fr 300px;
+	align-items: start;
+}
+
+@media (max-width: 1100px) {
+	.start-cols {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.start-photo {
+		grid-column: 1 / -1;
+		max-width: 380px;
+		justify-self: center;
+	}
+}
+
+@media (max-width: 760px) {
+	.start-cols {
+		grid-template-columns: 1fr;
+	}
+}
+
+.start-photo {
+	margin: 0;
+}
+
+.start-photo img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 12px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+	opacity: 0.2;
+	clip-path: inset(100% 0 0 0);
+	transition: opacity 0.8s ease, clip-path 1.1s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.reveal.on .start-photo img {
+	opacity: 0.6;
+	clip-path: inset(0 0 0 0);
+}
+
+.start-photo:hover img {
+	opacity: 1;
+}
+
+.start-photo figcaption {
+	font-size: 13px;
+	color: var(--grey);
+	margin-top: 12px;
+	opacity: 0;
+	transition: opacity 0.8s ease 0.5s;
+}
+
+.reveal.on .start-photo figcaption {
+	opacity: 1;
+}
+
 /* ---------- turn ---------- */
 .turn-grid {
 	display: grid;
@@ -1375,5 +1435,14 @@ footer {
 	.city-lines .dot,
 	.city-lines .block {
 		opacity: 1;
+	}
+	.start-photo img {
+		opacity: 0.6;
+		clip-path: none;
+		transition: none;
+	}
+	.start-photo figcaption {
+		opacity: 1;
+		transition: none;
 	}
 }
