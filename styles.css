@@ -657,7 +657,7 @@ nav .links a:hover .nav-char {
 	clip-path: inset(0 0 0 0);
 }
 
-.start-photo:hover img {
+.reveal.on .start-photo:hover img {
 	opacity: 1;
 }
 
