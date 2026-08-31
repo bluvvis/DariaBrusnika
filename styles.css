@@ -631,6 +631,7 @@ nav .links a:hover .nav-char {
 .reveal-photo {
 	margin: 0 -60px 0 auto;
 	max-width: 600px;
+	min-height: 600px;
 	transform: translateY(80px) scale(0.9) rotate(-4deg);
 	transition: all 1.2s ease-out;
 	will-change: opacity, transform;
@@ -656,15 +657,12 @@ nav .links a:hover .nav-char {
 	margin-top: 14px;
 }
 
-.reveal-text {
-	transform: translateY(30px);
-	transition: all 0.8s ease-out;
-	transition-delay: 0.2s;
-	will-change: opacity, transform;
+.start-text {
+	opacity: 1;
+	transform: none;
 }
 
-.reveal-photo.reveal-active,
-.reveal-text.reveal-active {
+.reveal-photo.reveal-active {
 	opacity: 1;
 	transform: translateY(0) scale(1) rotate(0deg);
 }
@@ -1432,8 +1430,7 @@ footer {
 	.city-lines .block {
 		opacity: 1;
 	}
-	.reveal-photo,
-	.reveal-text {
+	.reveal-photo {
 		opacity: 1;
 		transform: none;
 		transition: none;

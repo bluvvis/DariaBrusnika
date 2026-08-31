@@ -83,7 +83,7 @@ const revealObserver = new IntersectionObserver(
 )
 
 document
-	.querySelectorAll('.reveal-photo, .reveal-text')
+	.querySelectorAll('.reveal-photo')
 	.forEach(el => revealObserver.observe(el))
 
 // city lines animation
