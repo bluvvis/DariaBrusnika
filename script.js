@@ -69,22 +69,35 @@ const io = new IntersectionObserver(
 
 document.querySelectorAll('.reveal').forEach(el => io.observe(el))
 
-// ---------- fade-up + scale reveal (start section) ----------
-const revealObserver = new IntersectionObserver(
-	(entries, observer) => {
-		entries.forEach(entry => {
-			if (entry.isIntersecting) {
-				entry.target.classList.add('reveal-active')
-				observer.unobserve(entry.target)
-			}
-		})
-	},
-	{ threshold: 0.15 },
-)
+// ---------- start: фото всплывает поверх текста по наведению ----------
+const startStage = document.querySelector('.start-stage')
+const dollsTrigger = document.querySelector('.dolls-trigger')
 
-document
-	.querySelectorAll('.reveal-photo')
-	.forEach(el => revealObserver.observe(el))
+if (startStage && dollsTrigger) {
+	const startPop = startStage.querySelector('.start-pop')
+	let closeTimer = null
+
+	const openPop = () => {
+		clearTimeout(closeTimer)
+		startStage.classList.add('photo-open')
+	}
+
+	const closePop = () => {
+		closeTimer = setTimeout(() => startStage.classList.remove('photo-open'), 120)
+	}
+
+	;[dollsTrigger, startPop].forEach(el => {
+		el.addEventListener('mouseenter', openPop)
+		el.addEventListener('mouseleave', closePop)
+	})
+
+	dollsTrigger.addEventListener('focus', openPop)
+	dollsTrigger.addEventListener('blur', closePop)
+	dollsTrigger.addEventListener('click', openPop)
+	document.addEventListener('keydown', e => {
+		if (e.key === 'Escape') startStage.classList.remove('photo-open')
+	})
+}
 
 // city lines animation
 const cityLines = document.querySelector('.city-lines')
