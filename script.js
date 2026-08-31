@@ -69,6 +69,23 @@ const io = new IntersectionObserver(
 
 document.querySelectorAll('.reveal').forEach(el => io.observe(el))
 
+// ---------- fade-up + scale reveal (start section) ----------
+const revealObserver = new IntersectionObserver(
+	(entries, observer) => {
+		entries.forEach(entry => {
+			if (entry.isIntersecting) {
+				entry.target.classList.add('reveal-active')
+				observer.unobserve(entry.target)
+			}
+		})
+	},
+	{ threshold: 0.15 },
+)
+
+document
+	.querySelectorAll('.reveal-photo, .reveal-text')
+	.forEach(el => revealObserver.observe(el))
+
 // city lines animation
 const cityLines = document.querySelector('.city-lines')
 if (cityLines) {

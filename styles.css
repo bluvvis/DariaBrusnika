@@ -613,64 +613,60 @@ nav .links a:hover .nav-char {
 	margin-bottom: 16px;
 }
 
-/* ---------- start photo (окно в прошлое) ---------- */
-.start-cols {
-	grid-template-columns: 1fr 1fr 300px;
-	align-items: start;
+/* ---------- start: фото + текст с fade-up ---------- */
+.start-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 600px);
+	gap: 56px;
+	align-items: center;
 }
 
 @media (max-width: 1100px) {
-	.start-cols {
-		grid-template-columns: 1fr 1fr;
-	}
-
-	.start-photo {
-		grid-column: 1 / -1;
-		max-width: 380px;
-		justify-self: center;
-	}
-}
-
-@media (max-width: 760px) {
-	.start-cols {
+	.start-grid {
 		grid-template-columns: 1fr;
+		gap: 36px;
 	}
 }
 
-.start-photo {
-	margin: 0;
+.reveal-photo {
+	margin: 0 -60px 0 auto;
+	max-width: 600px;
+	transform: translateY(80px) scale(0.9) rotate(-4deg);
+	transition: all 1.2s ease-out;
+	will-change: opacity, transform;
 }
 
-.start-photo img {
+@media (max-width: 1100px) {
+	.reveal-photo {
+		margin: 0 auto;
+	}
+}
+
+.reveal-photo img {
 	display: block;
 	width: 100%;
 	height: auto;
-	border-radius: 12px;
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-	opacity: 0.2;
-	clip-path: inset(100% 0 0 0);
-	transition: opacity 0.8s ease, clip-path 1.1s cubic-bezier(0.22, 0.61, 0.36, 1);
+	border-radius: 20px;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
 }
 
-.reveal.on .start-photo img {
-	opacity: 0.6;
-	clip-path: inset(0 0 0 0);
-}
-
-.reveal.on .start-photo:hover img {
-	opacity: 1;
-}
-
-.start-photo figcaption {
+.reveal-photo figcaption {
 	font-size: 13px;
 	color: var(--grey);
-	margin-top: 12px;
-	opacity: 0;
-	transition: opacity 0.8s ease 0.5s;
+	margin-top: 14px;
 }
 
-.reveal.on .start-photo figcaption {
+.reveal-text {
+	transform: translateY(30px);
+	transition: all 0.8s ease-out;
+	transition-delay: 0.2s;
+	will-change: opacity, transform;
+}
+
+.reveal-photo.reveal-active,
+.reveal-text.reveal-active {
 	opacity: 1;
+	transform: translateY(0) scale(1) rotate(0deg);
 }
 
 /* ---------- turn ---------- */
@@ -1436,13 +1432,10 @@ footer {
 	.city-lines .block {
 		opacity: 1;
 	}
-	.start-photo img {
-		opacity: 0.6;
-		clip-path: none;
-		transition: none;
-	}
-	.start-photo figcaption {
+	.reveal-photo,
+	.reveal-text {
 		opacity: 1;
+		transform: none;
 		transition: none;
 	}
 }
