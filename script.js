@@ -325,12 +325,13 @@ if (boom) {
 // ---------- tasks hover/click reveal ----------
 const taskItems = document.querySelectorAll('[data-task]')
 
+let taskHoverTimer = null
+
 taskItems.forEach(el => {
 	const openTask = () => {
 		const isActive = el.classList.contains('active')
 		const ksrpPhoto = el.querySelector('.task-photo-inline')
-		
-		// Закрываем все блоки и скрываем все фото
+
 		taskItems.forEach(t => {
 			t.classList.remove('active')
 			const photo = t.querySelector('.task-photo-inline')
@@ -343,26 +344,32 @@ taskItems.forEach(el => {
 				}, 500)
 			}
 		})
-		
-		// Открываем текущий блок если он не был активен
+
 		if (!isActive) {
+			const full = el.querySelector('.task-full')
+			if (full) full.style.setProperty('--full-h', `${full.scrollHeight}px`)
 			el.classList.add('active')
-			// Показываем фото КСРП если это нужный блок
 			if (ksrpPhoto) {
 				ksrpPhoto.style.display = 'block'
-				// Небольшая задержка для плавности
 				setTimeout(() => {
 					ksrpPhoto.classList.add('visible')
 				}, 100)
 			}
 		}
 	}
-	
-	// При наведении
-	el.addEventListener('mouseenter', openTask)
-	
-	// При клике
-	el.querySelector('.task-short')?.addEventListener('click', openTask)
+
+	el.addEventListener('mouseenter', () => {
+		if (el.classList.contains('active')) return
+		clearTimeout(taskHoverTimer)
+		taskHoverTimer = setTimeout(openTask, 160)
+	})
+
+	el.addEventListener('mouseleave', () => clearTimeout(taskHoverTimer))
+
+	el.querySelector('.task-short')?.addEventListener('click', () => {
+		clearTimeout(taskHoverTimer)
+		openTask()
+	})
 })
 
 // ---------- skills wheel ----------
