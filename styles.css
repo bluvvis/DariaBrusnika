@@ -898,7 +898,8 @@ nav .links a:hover .nav-char {
 }
 
 .case-head > div {
-	background: var(--card);
+	background: var(--ink);
+	color: var(--paper);
 	font-weight: 700;
 	font-size: 12px;
 	letter-spacing: 0.1em;
@@ -1374,6 +1375,14 @@ nav .links a:hover .nav-char {
 	color: var(--red);
 	font-family: var(--font-body);
 	font-weight: 700;
+}
+
+.reflect-title {
+	font-family: var(--font-body);
+	font-size: clamp(20px, 2.8vw, 28px);
+	letter-spacing: 0.14em;
+	text-transform: lowercase;
+	font-weight: 600;
 }
 
 .skills-lists {
