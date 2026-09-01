@@ -709,6 +709,11 @@ nav .links a:hover .nav-char {
 	background: var(--card);
 }
 
+.turn-title {
+	font-size: clamp(18px, 5.4vw, 62px);
+	white-space: nowrap;
+}
+
 .turn-grid {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
