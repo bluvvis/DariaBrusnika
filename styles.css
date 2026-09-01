@@ -764,6 +764,7 @@ nav .links a:hover .nav-char {
 /* ---------- dive / boom ---------- */
 .dive-sec {
 	background: var(--paper);
+	overflow: hidden;
 }
 
 .boom-wrap {
@@ -772,7 +773,7 @@ nav .links a:hover .nav-char {
 
 .boom {
 	position: absolute;
-	inset: -70px -20px -70px -20px;
+	inset: -90px -7vw -90px -7vw;
 	pointer-events: none;
 	z-index: 0;
 }

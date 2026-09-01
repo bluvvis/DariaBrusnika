@@ -292,28 +292,65 @@ if (boom) {
 		'ГПЗУ',
 		'КХ',
 	]
-	abbrs.forEach((a, i) => {
+	const spans = abbrs.map((a, i) => {
 		const s = document.createElement('span')
 		s.textContent = a
-		const ang = (i / abbrs.length) * Math.PI * 2 + Math.random() * 0.5
-		const w = boom.clientWidth || 900
-		const h = boom.clientHeight || 420
-		const rx = w * 0.34 + Math.random() * w * 0.16
-		const ry = h * 0.32 + Math.random() * h * 0.18
-		s.style.setProperty('--x', Math.cos(ang) * rx + 'px')
-		s.style.setProperty('--y', Math.sin(ang) * ry + 'px')
+		s.dataset.ang = (i / abbrs.length) * Math.PI * 2 + Math.random() * 0.5
+		s.dataset.spread = (0.75 + Math.random() * 0.35).toFixed(2)
 		s.style.setProperty('--r', Math.random() * 44 - 22 + 'deg')
-		s.style.setProperty('--o', (0.12 + Math.random() * 0.5).toFixed(2))
-		s.style.fontSize = 13 + Math.random() * 26 + 'px'
+		s.style.setProperty('--o', (0.12 + Math.random() * 0.38).toFixed(2))
+		s.style.fontSize = 13 + Math.random() * 22 + 'px'
 		const colors = ['var(--red)', 'var(--wine)', 'var(--grey)']
 		s.style.color = colors[Math.floor(Math.random() * colors.length)]
 		s.style.transitionDelay = Math.random() * 0.35 + 's'
 		boom.appendChild(s)
+		return s
 	})
+
+	const textEls = Array.from(
+		boom.parentElement.querySelectorAll('.kicker, .h2, .lead'),
+	)
+
+	const place = () => {
+		const box = boom.getBoundingClientRect()
+		const cx = box.width / 2
+		const cy = box.height / 2
+		let safeRight = 0
+		let safeTop = cy
+		let safeBottom = cy
+		textEls.forEach(el => {
+			const r = el.getBoundingClientRect()
+			safeRight = Math.max(safeRight, r.right - box.left)
+			safeTop = Math.min(safeTop, r.top - box.top)
+			safeBottom = Math.max(safeBottom, r.bottom - box.top)
+		})
+
+		spans.forEach(s => {
+			const ang = parseFloat(s.dataset.ang)
+			const spread = parseFloat(s.dataset.spread)
+			let x = Math.cos(ang) * cx * spread
+			let y = Math.sin(ang) * (box.height * 0.42) * spread
+			const half = s.offsetWidth / 2 + 14
+			const limit = cx - half
+			const minRight = safeRight - cx + half + 20
+
+			if (cy + y > safeTop - 20 && cy + y < safeBottom + 20) {
+				if (minRight <= limit) x = Math.max(x, minRight)
+				else y = y < 0 ? safeTop - cy - 34 : safeBottom - cy + 34
+			}
+
+			s.style.setProperty('--x', Math.max(-limit, Math.min(limit, x)) + 'px')
+			s.style.setProperty('--y', Math.max(-cy + 14, Math.min(cy - 14, y)) + 'px')
+		})
+	}
+
+	place()
+	window.addEventListener('resize', place)
 
 	new IntersectionObserver(
 		([e], obs) => {
 			if (e.isIntersecting) {
+				place()
 				boom.classList.add('go')
 				obs.disconnect()
 			}
