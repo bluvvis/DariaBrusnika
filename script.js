@@ -461,6 +461,7 @@ if (wheel && wheelSpin && wheelContainer) {
 	let rotation = 0
 	let isDragging = false
 	let lastAngle = 0
+	let targetRotation = null
 
 	skills.forEach((skill, i) => {
 		const start = i * step - Math.PI / 2
@@ -506,7 +507,10 @@ if (wheel && wheelSpin && wheelContainer) {
 		label.textContent = skill.label
 
 		labelGroup.appendChild(label)
-		path.addEventListener('click', () => selectSkill(i))
+		path.addEventListener('click', () => {
+			selectSkill(i)
+			rotateToTop(i)
+		})
 		wheel.appendChild(path)
 		wheel.appendChild(labelGroup)
 	})
@@ -516,7 +520,14 @@ if (wheel && wheelSpin && wheelContainer) {
 			s.classList.toggle('active', j === i)
 		})
 		wheelLabel.textContent = skills[i].label
-		wheelDetail.innerHTML = `<p class="wheel-detail-text">${skills[i].text}</p>`
+		wheelDetail.querySelector('.wheel-detail-text').textContent = skills[i].text
+	}
+
+	function rotateToTop(i) {
+		const stepDeg = 360 / n
+		let target = -(i + 0.5) * stepDeg
+		target += 360 * Math.round((rotation - target) / 360)
+		targetRotation = target
 	}
 
 	function setRotation(deg) {
@@ -541,6 +552,7 @@ if (wheel && wheelSpin && wheelContainer) {
 
 	window.addEventListener('mousemove', e => {
 		if (!isDragging) return
+		targetRotation = null
 		const a = getAngle(e)
 		setRotation(rotation + (a - lastAngle) * (180 / Math.PI))
 		lastAngle = a
@@ -583,7 +595,17 @@ if (wheel && wheelSpin && wheelContainer) {
 	})
 
 	const spin = () => {
-		if (autoRotate && !isDragging) setRotation(rotation + 0.12)
+		if (targetRotation !== null) {
+			const diff = targetRotation - rotation
+			if (Math.abs(diff) < 0.15) {
+				setRotation(targetRotation)
+				targetRotation = null
+			} else {
+				setRotation(rotation + diff * 0.12)
+			}
+		} else if (autoRotate && !isDragging) {
+			setRotation(rotation + 0.12)
+		}
 		requestAnimationFrame(spin)
 	}
 	spin()
