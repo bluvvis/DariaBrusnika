@@ -1237,18 +1237,20 @@ nav .links a:hover .nav-char {
 	gap: 18px;
 	padding: 24px 0;
 	border-bottom: 1px solid var(--line);
-	align-items: start;
+	align-items: baseline;
 }
 
 .hard-item .n {
 	font-family: var(--font-display);
 	font-size: 26px;
 	font-weight: 700;
+	line-height: 1.5;
 	color: var(--red);
 }
 
 .hard-item p {
 	font-size: 16px;
+	line-height: 1.5;
 	max-width: 640px;
 }
 
