@@ -74,29 +74,38 @@ const startStage = document.querySelector('.start-stage')
 const dollsTrigger = document.querySelector('.dolls-trigger')
 
 if (startStage && dollsTrigger) {
+	const HOLD_MS = 1000
+	let holdTimer = null
+	let armed = false
 	let anchor = null
+	let pointer = { x: 0, y: 0 }
 
 	const closePop = () => {
-		anchor = null
+		clearTimeout(holdTimer)
+		armed = false
 		startStage.classList.remove('photo-open')
 	}
 
-	dollsTrigger.addEventListener('mouseenter', e => {
-		anchor = { x: e.clientX, y: e.clientY }
+	const openPop = () => {
+		clearTimeout(holdTimer)
+		armed = false
 		startStage.classList.add('photo-open')
-	})
+		holdTimer = setTimeout(() => {
+			armed = true
+			anchor = pointer
+		}, HOLD_MS)
+	}
+
+	dollsTrigger.addEventListener('mouseenter', openPop)
+	dollsTrigger.addEventListener('focus', openPop)
+	dollsTrigger.addEventListener('blur', closePop)
 
 	document.addEventListener('mousemove', e => {
-		if (!anchor) return
+		pointer = { x: e.clientX, y: e.clientY }
+		if (!armed) return
 		if (Math.hypot(e.clientX - anchor.x, e.clientY - anchor.y) > 6) closePop()
 	})
 
-	dollsTrigger.addEventListener('mouseleave', closePop)
-	dollsTrigger.addEventListener('focus', () => {
-		anchor = null
-		startStage.classList.add('photo-open')
-	})
-	dollsTrigger.addEventListener('blur', closePop)
 	document.addEventListener('keydown', e => {
 		if (e.key === 'Escape') closePop()
 	})
