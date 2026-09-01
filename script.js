@@ -69,6 +69,133 @@ const io = new IntersectionObserver(
 
 document.querySelectorAll('.reveal').forEach(el => io.observe(el))
 
+const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+// ---------- reading progress ----------
+const progressBar = document.getElementById('progressBar')
+
+if (progressBar) {
+	const updateProgress = () => {
+		const max = document.documentElement.scrollHeight - window.innerHeight
+		const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
+		progressBar.style.transform = `scaleX(${p})`
+	}
+	window.addEventListener('scroll', updateProgress, { passive: true })
+	window.addEventListener('resize', updateProgress)
+	updateProgress()
+}
+
+// ---------- word mask reveal ----------
+if (motionOk) {
+	const splitWords = el => {
+		const frag = document.createDocumentFragment()
+		let i = 0
+
+		const pushWord = node => {
+			const word = document.createElement('span')
+			word.className = 'word'
+			const inner = document.createElement('span')
+			inner.style.setProperty('--i', i++)
+			inner.appendChild(node)
+			word.appendChild(inner)
+			frag.appendChild(word)
+		}
+
+		Array.from(el.childNodes).forEach(node => {
+			if (node.nodeType === Node.TEXT_NODE) {
+				const parts = node.textContent.split(/(\s+)/)
+				parts.forEach(part => {
+					if (!part) return
+					if (/^\s+$/.test(part)) frag.appendChild(document.createTextNode(' '))
+					else pushWord(document.createTextNode(part))
+				})
+			} else if (node.nodeName === 'BR') {
+				frag.appendChild(node)
+			} else {
+				pushWord(node)
+			}
+		})
+
+		el.textContent = ''
+		el.appendChild(frag)
+		el.classList.add('words')
+	}
+
+	document.querySelectorAll('.hero h1, h2.h2').forEach(splitWords)
+}
+
+// ---------- photo parallax ----------
+const parallaxImgs = Array.from(
+	document.querySelectorAll(
+		'#turn figure img, .task-photo-inline img',
+	),
+)
+
+if (motionOk && parallaxImgs.length) {
+	parallaxImgs.forEach(img => {
+		img.classList.add('parallax-img')
+		if (img.parentElement) img.parentElement.classList.add('parallax-frame')
+	})
+
+	let ticking = false
+	const updateParallax = () => {
+		const vh = window.innerHeight
+		parallaxImgs.forEach(img => {
+			const rect = img.getBoundingClientRect()
+			if (rect.bottom < -200 || rect.top > vh + 200) return
+			const centerDelta = rect.top + rect.height / 2 - vh / 2
+			const shift = Math.max(-28, Math.min(28, (-centerDelta / vh) * 40))
+			img.style.setProperty('--py', `${shift.toFixed(1)}px`)
+		})
+		ticking = false
+	}
+	const onScrollParallax = () => {
+		if (ticking) return
+		ticking = true
+		requestAnimationFrame(updateParallax)
+	}
+	window.addEventListener('scroll', onScrollParallax, { passive: true })
+	window.addEventListener('resize', onScrollParallax)
+	updateParallax()
+}
+
+// ---------- stats count up ----------
+const statsBlock = document.querySelector('.stats')
+
+if (statsBlock) {
+	const runCount = () => {
+		statsBlock.querySelectorAll('.stat-num').forEach(el => {
+			const target = parseFloat(el.dataset.count)
+			const decimals = parseInt(el.dataset.decimals || '0', 10)
+			if (!motionOk) {
+				el.textContent = target.toFixed(decimals).replace('.', ',')
+				return
+			}
+			const duration = 1200
+			const start = performance.now()
+			const step = now => {
+				const t = Math.min(1, (now - start) / duration)
+				const eased = 1 - Math.pow(1 - t, 3)
+				el.textContent = (target * eased).toFixed(decimals).replace('.', ',')
+				if (t < 1) requestAnimationFrame(step)
+			}
+			requestAnimationFrame(step)
+		})
+	}
+
+	new IntersectionObserver(
+		(entries, obs) => {
+			entries.forEach(e => {
+				if (e.isIntersecting) {
+					runCount()
+					obs.disconnect()
+				}
+			})
+		},
+		{ threshold: 0.4 },
+	).observe(statsBlock)
+}
+
 // ---------- start: фото всплывает поверх текста по наведению ----------
 const startStage = document.querySelector('.start-stage')
 const dollsTrigger = document.querySelector('.dolls-trigger')
@@ -111,6 +238,32 @@ if (startStage && dollsTrigger) {
 	})
 }
 
+// ---------- liked strip: бесконечная бегущая лента ----------
+const stripTrack = document.querySelector('.strip-track')
+if (stripTrack) {
+	const SPEED = 40 // px/s
+	const GAP = 16
+
+	Array.from(stripTrack.children).forEach(el => {
+		const copy = el.cloneNode(true)
+		copy.setAttribute('aria-hidden', 'true')
+		stripTrack.appendChild(copy)
+	})
+
+	const setDuration = () => {
+		const half = (stripTrack.scrollWidth - GAP) / 2
+		if (half > 0)
+			stripTrack.style.setProperty('--strip-duration', `${half / SPEED}s`)
+	}
+
+	setDuration()
+	window.addEventListener('load', setDuration)
+	window.addEventListener('resize', setDuration)
+	stripTrack.querySelectorAll('img').forEach(img => {
+		if (!img.complete) img.addEventListener('load', setDuration, { once: true })
+	})
+}
+
 // city lines animation
 const cityLines = document.querySelector('.city-lines')
 if (cityLines) {
@@ -139,28 +292,65 @@ if (boom) {
 		'ГПЗУ',
 		'КХ',
 	]
-	abbrs.forEach((a, i) => {
+	const spans = abbrs.map((a, i) => {
 		const s = document.createElement('span')
 		s.textContent = a
-		const ang = (i / abbrs.length) * Math.PI * 2 + Math.random() * 0.5
-		const w = boom.clientWidth || 900
-		const h = boom.clientHeight || 420
-		const rx = w * 0.34 + Math.random() * w * 0.16
-		const ry = h * 0.32 + Math.random() * h * 0.18
-		s.style.setProperty('--x', Math.cos(ang) * rx + 'px')
-		s.style.setProperty('--y', Math.sin(ang) * ry + 'px')
+		s.dataset.ang = (i / abbrs.length) * Math.PI * 2 + Math.random() * 0.5
+		s.dataset.spread = (0.75 + Math.random() * 0.35).toFixed(2)
 		s.style.setProperty('--r', Math.random() * 44 - 22 + 'deg')
-		s.style.setProperty('--o', (0.12 + Math.random() * 0.5).toFixed(2))
-		s.style.fontSize = 13 + Math.random() * 26 + 'px'
+		s.style.setProperty('--o', (0.12 + Math.random() * 0.38).toFixed(2))
+		s.style.fontSize = 13 + Math.random() * 22 + 'px'
 		const colors = ['var(--red)', 'var(--wine)', 'var(--grey)']
 		s.style.color = colors[Math.floor(Math.random() * colors.length)]
 		s.style.transitionDelay = Math.random() * 0.35 + 's'
 		boom.appendChild(s)
+		return s
 	})
+
+	const textEls = Array.from(
+		boom.parentElement.querySelectorAll('.kicker, .h2, .lead'),
+	)
+
+	const place = () => {
+		const box = boom.getBoundingClientRect()
+		const cx = box.width / 2
+		const cy = box.height / 2
+		let safeRight = 0
+		let safeTop = cy
+		let safeBottom = cy
+		textEls.forEach(el => {
+			const r = el.getBoundingClientRect()
+			safeRight = Math.max(safeRight, r.right - box.left)
+			safeTop = Math.min(safeTop, r.top - box.top)
+			safeBottom = Math.max(safeBottom, r.bottom - box.top)
+		})
+
+		spans.forEach(s => {
+			const ang = parseFloat(s.dataset.ang)
+			const spread = parseFloat(s.dataset.spread)
+			let x = Math.cos(ang) * cx * spread
+			let y = Math.sin(ang) * (box.height * 0.42) * spread
+			const half = s.offsetWidth / 2 + 14
+			const limit = cx - half
+			const minRight = safeRight - cx + half + 20
+
+			if (cy + y > safeTop - 20 && cy + y < safeBottom + 20) {
+				if (minRight <= limit) x = Math.max(x, minRight)
+				else y = y < 0 ? safeTop - cy - 34 : safeBottom - cy + 34
+			}
+
+			s.style.setProperty('--x', Math.max(-limit, Math.min(limit, x)) + 'px')
+			s.style.setProperty('--y', Math.max(-cy + 14, Math.min(cy - 14, y)) + 'px')
+		})
+	}
+
+	place()
+	window.addEventListener('resize', place)
 
 	new IntersectionObserver(
 		([e], obs) => {
 			if (e.isIntersecting) {
+				place()
 				boom.classList.add('go')
 				obs.disconnect()
 			}
@@ -172,12 +362,13 @@ if (boom) {
 // ---------- tasks hover/click reveal ----------
 const taskItems = document.querySelectorAll('[data-task]')
 
+let taskHoverTimer = null
+
 taskItems.forEach(el => {
 	const openTask = () => {
 		const isActive = el.classList.contains('active')
 		const ksrpPhoto = el.querySelector('.task-photo-inline')
-		
-		// Закрываем все блоки и скрываем все фото
+
 		taskItems.forEach(t => {
 			t.classList.remove('active')
 			const photo = t.querySelector('.task-photo-inline')
@@ -190,26 +381,32 @@ taskItems.forEach(el => {
 				}, 500)
 			}
 		})
-		
-		// Открываем текущий блок если он не был активен
+
 		if (!isActive) {
+			const full = el.querySelector('.task-full')
+			if (full) full.style.setProperty('--full-h', `${full.scrollHeight}px`)
 			el.classList.add('active')
-			// Показываем фото КСРП если это нужный блок
 			if (ksrpPhoto) {
 				ksrpPhoto.style.display = 'block'
-				// Небольшая задержка для плавности
 				setTimeout(() => {
 					ksrpPhoto.classList.add('visible')
 				}, 100)
 			}
 		}
 	}
-	
-	// При наведении
-	el.addEventListener('mouseenter', openTask)
-	
-	// При клике
-	el.querySelector('.task-short')?.addEventListener('click', openTask)
+
+	el.addEventListener('mouseenter', () => {
+		if (el.classList.contains('active')) return
+		clearTimeout(taskHoverTimer)
+		taskHoverTimer = setTimeout(openTask, 160)
+	})
+
+	el.addEventListener('mouseleave', () => clearTimeout(taskHoverTimer))
+
+	el.querySelector('.task-short')?.addEventListener('click', () => {
+		clearTimeout(taskHoverTimer)
+		openTask()
+	})
 })
 
 // ---------- skills wheel ----------
@@ -264,6 +461,7 @@ if (wheel && wheelSpin && wheelContainer) {
 	let rotation = 0
 	let isDragging = false
 	let lastAngle = 0
+	let targetRotation = null
 
 	skills.forEach((skill, i) => {
 		const start = i * step - Math.PI / 2
@@ -309,7 +507,10 @@ if (wheel && wheelSpin && wheelContainer) {
 		label.textContent = skill.label
 
 		labelGroup.appendChild(label)
-		path.addEventListener('click', () => selectSkill(i))
+		path.addEventListener('click', () => {
+			selectSkill(i)
+			rotateToTop(i)
+		})
 		wheel.appendChild(path)
 		wheel.appendChild(labelGroup)
 	})
@@ -319,7 +520,14 @@ if (wheel && wheelSpin && wheelContainer) {
 			s.classList.toggle('active', j === i)
 		})
 		wheelLabel.textContent = skills[i].label
-		wheelDetail.innerHTML = `<p class="wheel-detail-text">${skills[i].text}</p>`
+		wheelDetail.querySelector('.wheel-detail-text').textContent = skills[i].text
+	}
+
+	function rotateToTop(i) {
+		const stepDeg = 360 / n
+		let target = -(i + 0.5) * stepDeg
+		target += 360 * Math.round((rotation - target) / 360)
+		targetRotation = target
 	}
 
 	function setRotation(deg) {
@@ -344,6 +552,7 @@ if (wheel && wheelSpin && wheelContainer) {
 
 	window.addEventListener('mousemove', e => {
 		if (!isDragging) return
+		targetRotation = null
 		const a = getAngle(e)
 		setRotation(rotation + (a - lastAngle) * (180 / Math.PI))
 		lastAngle = a
@@ -386,7 +595,17 @@ if (wheel && wheelSpin && wheelContainer) {
 	})
 
 	const spin = () => {
-		if (autoRotate && !isDragging) setRotation(rotation + 0.12)
+		if (targetRotation !== null) {
+			const diff = targetRotation - rotation
+			if (Math.abs(diff) < 0.15) {
+				setRotation(targetRotation)
+				targetRotation = null
+			} else {
+				setRotation(rotation + diff * 0.12)
+			}
+		} else if (autoRotate && !isDragging) {
+			setRotation(rotation + 0.12)
+		}
 		requestAnimationFrame(spin)
 	}
 	spin()
