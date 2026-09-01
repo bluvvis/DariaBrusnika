@@ -613,6 +613,94 @@ nav .links a:hover .nav-char {
 	margin-bottom: 16px;
 }
 
+/* ---------- start: пульсирующий триггер + всплывающее фото ---------- */
+.dolls-trigger {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	color: var(--wine);
+	border-bottom: 2px dotted var(--wine);
+	animation: dollsPulse 2s ease-in-out infinite;
+	transform-origin: 50% 60%;
+	outline: none;
+}
+
+.dolls-trigger:hover,
+.dolls-trigger:focus-visible {
+	animation-play-state: paused;
+	color: var(--red);
+	border-bottom-color: var(--red);
+}
+
+@keyframes dollsPulse {
+	0%,
+	100% {
+		transform: scale(1);
+		text-shadow: 0 0 0 rgba(155, 28, 49, 0);
+	}
+	50% {
+		transform: scale(1.045);
+		text-shadow: 0 6px 22px rgba(155, 28, 49, 0.28);
+	}
+}
+
+.start-stage {
+	position: relative;
+	min-height: 340px;
+}
+
+.start-stage .cols {
+	transition:
+		opacity 0.45s ease,
+		filter 0.45s ease;
+}
+
+.start-stage.photo-open .cols {
+	opacity: 0.08;
+	filter: blur(3px);
+}
+
+.start-pop {
+	position: absolute;
+	inset: -20px -12px;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	z-index: 3;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transform: translateY(26px) scale(0.94);
+	transition:
+		opacity 0.5s ease,
+		transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
+		visibility 0.5s;
+	will-change: opacity, transform;
+}
+
+.start-stage.photo-open .start-pop {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0) scale(1);
+}
+
+.start-pop img {
+	display: block;
+	max-width: min(600px, 100%);
+	max-height: 100%;
+	height: auto;
+	border-radius: 20px;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.start-pop figcaption {
+	font-size: 13px;
+	color: var(--grey);
+}
+
 /* ---------- turn ---------- */
 .turn-grid {
 	display: grid;
@@ -1375,5 +1463,12 @@ footer {
 	.city-lines .dot,
 	.city-lines .block {
 		opacity: 1;
+	}
+	.dolls-trigger {
+		animation: none;
+	}
+	.start-pop,
+	.start-stage .cols {
+		transition: none;
 	}
 }

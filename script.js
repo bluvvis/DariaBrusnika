@@ -69,6 +69,48 @@ const io = new IntersectionObserver(
 
 document.querySelectorAll('.reveal').forEach(el => io.observe(el))
 
+// ---------- start: фото всплывает поверх текста по наведению ----------
+const startStage = document.querySelector('.start-stage')
+const dollsTrigger = document.querySelector('.dolls-trigger')
+
+if (startStage && dollsTrigger) {
+	const HOLD_MS = 1000
+	let holdTimer = null
+	let armed = false
+	let anchor = null
+	let pointer = { x: 0, y: 0 }
+
+	const closePop = () => {
+		clearTimeout(holdTimer)
+		armed = false
+		startStage.classList.remove('photo-open')
+	}
+
+	const openPop = () => {
+		clearTimeout(holdTimer)
+		armed = false
+		startStage.classList.add('photo-open')
+		holdTimer = setTimeout(() => {
+			armed = true
+			anchor = pointer
+		}, HOLD_MS)
+	}
+
+	dollsTrigger.addEventListener('mouseenter', openPop)
+	dollsTrigger.addEventListener('focus', openPop)
+	dollsTrigger.addEventListener('blur', closePop)
+
+	document.addEventListener('mousemove', e => {
+		pointer = { x: e.clientX, y: e.clientY }
+		if (!armed) return
+		if (Math.hypot(e.clientX - anchor.x, e.clientY - anchor.y) > 6) closePop()
+	})
+
+	document.addEventListener('keydown', e => {
+		if (e.key === 'Escape') closePop()
+	})
+}
+
 // city lines animation
 const cityLines = document.querySelector('.city-lines')
 if (cityLines) {
