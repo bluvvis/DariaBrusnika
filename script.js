@@ -111,6 +111,32 @@ if (startStage && dollsTrigger) {
 	})
 }
 
+// ---------- liked strip: бесконечная бегущая лента ----------
+const stripTrack = document.querySelector('.strip-track')
+if (stripTrack) {
+	const SPEED = 40 // px/s
+	const GAP = 16
+
+	Array.from(stripTrack.children).forEach(el => {
+		const copy = el.cloneNode(true)
+		copy.setAttribute('aria-hidden', 'true')
+		stripTrack.appendChild(copy)
+	})
+
+	const setDuration = () => {
+		const half = (stripTrack.scrollWidth - GAP) / 2
+		if (half > 0)
+			stripTrack.style.setProperty('--strip-duration', `${half / SPEED}s`)
+	}
+
+	setDuration()
+	window.addEventListener('load', setDuration)
+	window.addEventListener('resize', setDuration)
+	stripTrack.querySelectorAll('img').forEach(img => {
+		if (!img.complete) img.addEventListener('load', setDuration, { once: true })
+	})
+}
+
 // city lines animation
 const cityLines = document.querySelector('.city-lines')
 if (cityLines) {

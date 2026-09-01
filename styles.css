@@ -1095,25 +1095,32 @@ nav .links a:hover .nav-char {
 }
 
 .strip {
-	display: flex;
-	gap: 16px;
-	overflow-x: auto;
-	padding: 8px 24px 24px;
-	scroll-snap-type: x mandatory;
-	-webkit-overflow-scrolling: touch;
+	overflow: hidden;
+	padding: 8px 0 24px;
 }
 
-.strip::-webkit-scrollbar {
-	height: 8px;
+.strip-track {
+	display: flex;
+	gap: 16px;
+	width: max-content;
+	animation: stripScroll var(--strip-duration, 60s) linear infinite;
 }
-.strip::-webkit-scrollbar-thumb {
-	background: #444;
-	border-radius: 4px;
+
+.strip:hover .strip-track {
+	animation-play-state: paused;
+}
+
+@keyframes stripScroll {
+	from {
+		transform: translateX(0);
+	}
+	to {
+		transform: translateX(calc(-50% - 8px));
+	}
 }
 
 .shot {
 	flex: 0 0 auto;
-	scroll-snap-align: start;
 }
 .shot img {
 	height: 320px;
@@ -1452,6 +1459,12 @@ footer {
 		transition: none;
 	}
 	.marquee .track {
+		animation: none;
+	}
+	.strip {
+		overflow-x: auto;
+	}
+	.strip-track {
 		animation: none;
 	}
 	.scroll-hint {
