@@ -1433,8 +1433,7 @@ nav .links a:hover .nav-char {
 /* ---------- finale scroll fill ---------- */
 .finale {
 	background: var(--card);
-	padding: 140px 0 0;
-	min-height: 100vh;
+	padding: 120px 0 0;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -1490,7 +1489,7 @@ nav .links a:hover .nav-char {
 }
 
 .scroll-fill-spacer {
-	height: 55vh;
+	height: 18vh;
 	flex-shrink: 0;
 }
 
@@ -1512,7 +1511,105 @@ footer {
 	color: var(--grey);
 }
 
+/* ---------- reading progress ---------- */
+.progress-bar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 2px;
+	width: 100%;
+	transform: scaleX(0);
+	transform-origin: 0 50%;
+	background: var(--red);
+	z-index: 999;
+	pointer-events: none;
+}
+
+/* ---------- stats ---------- */
+.stats {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 24px;
+	margin-bottom: 72px;
+	padding-bottom: 40px;
+	border-bottom: 1px solid var(--line);
+}
+
+.stat-num {
+	display: block;
+	font-family: var(--font-display);
+	font-size: clamp(40px, 6vw, 76px);
+	font-weight: 700;
+	line-height: 1;
+	color: var(--red);
+	letter-spacing: -0.03em;
+	font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+	display: block;
+	margin-top: 10px;
+	font-size: 13px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--grey);
+}
+
+@media (max-width: 760px) {
+	.stats {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 28px 20px;
+		margin-bottom: 56px;
+	}
+}
+
+/* ---------- word mask reveal ---------- */
+.words .word {
+	display: inline-block;
+	overflow: hidden;
+	vertical-align: bottom;
+	padding: 0.14em 0.02em 0.12em;
+	margin: -0.14em -0.02em -0.12em;
+}
+
+.words .word > span {
+	display: inline-block;
+	transform: translateY(130%);
+	transition:
+		transform 0.72s cubic-bezier(0.22, 0.61, 0.36, 1),
+		opacity 0.72s ease;
+	opacity: 0;
+	transition-delay: calc(var(--i) * 55ms);
+}
+
+.words.on .word > span {
+	transform: translateY(0);
+	opacity: 1;
+}
+
+/* ---------- photo parallax ---------- */
+.parallax-img {
+	will-change: transform;
+	transform: translate3d(0, var(--py, 0px), 0) scale(var(--ps, 1.06));
+	transition: transform 0.08s linear;
+}
+
+.parallax-frame {
+	overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
+	.progress-bar {
+		display: none;
+	}
+	.words .word > span {
+		transform: none;
+		opacity: 1;
+		transition: none;
+	}
+	.parallax-img {
+		transform: none;
+	}
 	.reveal {
 		opacity: 1;
 		transform: none;

@@ -69,6 +69,133 @@ const io = new IntersectionObserver(
 
 document.querySelectorAll('.reveal').forEach(el => io.observe(el))
 
+const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+// ---------- reading progress ----------
+const progressBar = document.getElementById('progressBar')
+
+if (progressBar) {
+	const updateProgress = () => {
+		const max = document.documentElement.scrollHeight - window.innerHeight
+		const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
+		progressBar.style.transform = `scaleX(${p})`
+	}
+	window.addEventListener('scroll', updateProgress, { passive: true })
+	window.addEventListener('resize', updateProgress)
+	updateProgress()
+}
+
+// ---------- word mask reveal ----------
+if (motionOk) {
+	const splitWords = el => {
+		const frag = document.createDocumentFragment()
+		let i = 0
+
+		const pushWord = node => {
+			const word = document.createElement('span')
+			word.className = 'word'
+			const inner = document.createElement('span')
+			inner.style.setProperty('--i', i++)
+			inner.appendChild(node)
+			word.appendChild(inner)
+			frag.appendChild(word)
+		}
+
+		Array.from(el.childNodes).forEach(node => {
+			if (node.nodeType === Node.TEXT_NODE) {
+				const parts = node.textContent.split(/(\s+)/)
+				parts.forEach(part => {
+					if (!part) return
+					if (/^\s+$/.test(part)) frag.appendChild(document.createTextNode(' '))
+					else pushWord(document.createTextNode(part))
+				})
+			} else if (node.nodeName === 'BR') {
+				frag.appendChild(node)
+			} else {
+				pushWord(node)
+			}
+		})
+
+		el.textContent = ''
+		el.appendChild(frag)
+		el.classList.add('words')
+	}
+
+	document.querySelectorAll('.hero h1, h2.h2').forEach(splitWords)
+}
+
+// ---------- photo parallax ----------
+const parallaxImgs = Array.from(
+	document.querySelectorAll(
+		'#turn figure img, .task-photo-inline img',
+	),
+)
+
+if (motionOk && parallaxImgs.length) {
+	parallaxImgs.forEach(img => {
+		img.classList.add('parallax-img')
+		if (img.parentElement) img.parentElement.classList.add('parallax-frame')
+	})
+
+	let ticking = false
+	const updateParallax = () => {
+		const vh = window.innerHeight
+		parallaxImgs.forEach(img => {
+			const rect = img.getBoundingClientRect()
+			if (rect.bottom < -200 || rect.top > vh + 200) return
+			const centerDelta = rect.top + rect.height / 2 - vh / 2
+			const shift = Math.max(-28, Math.min(28, (-centerDelta / vh) * 40))
+			img.style.setProperty('--py', `${shift.toFixed(1)}px`)
+		})
+		ticking = false
+	}
+	const onScrollParallax = () => {
+		if (ticking) return
+		ticking = true
+		requestAnimationFrame(updateParallax)
+	}
+	window.addEventListener('scroll', onScrollParallax, { passive: true })
+	window.addEventListener('resize', onScrollParallax)
+	updateParallax()
+}
+
+// ---------- stats count up ----------
+const statsBlock = document.querySelector('.stats')
+
+if (statsBlock) {
+	const runCount = () => {
+		statsBlock.querySelectorAll('.stat-num').forEach(el => {
+			const target = parseFloat(el.dataset.count)
+			const decimals = parseInt(el.dataset.decimals || '0', 10)
+			if (!motionOk) {
+				el.textContent = target.toFixed(decimals).replace('.', ',')
+				return
+			}
+			const duration = 1200
+			const start = performance.now()
+			const step = now => {
+				const t = Math.min(1, (now - start) / duration)
+				const eased = 1 - Math.pow(1 - t, 3)
+				el.textContent = (target * eased).toFixed(decimals).replace('.', ',')
+				if (t < 1) requestAnimationFrame(step)
+			}
+			requestAnimationFrame(step)
+		})
+	}
+
+	new IntersectionObserver(
+		(entries, obs) => {
+			entries.forEach(e => {
+				if (e.isIntersecting) {
+					runCount()
+					obs.disconnect()
+				}
+			})
+		},
+		{ threshold: 0.4 },
+	).observe(statsBlock)
+}
+
 // ---------- start: фото всплывает поверх текста по наведению ----------
 const startStage = document.querySelector('.start-stage')
 const dollsTrigger = document.querySelector('.dolls-trigger')
